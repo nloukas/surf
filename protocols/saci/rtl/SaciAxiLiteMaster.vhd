@@ -3,7 +3,7 @@
 -------------------------------------------------------------------------------
 -- Company    : SLAC National Accelerator Laboratory
 -------------------------------------------------------------------------------
--- Description: New and improved version of the AxiLiteSaciMaster.
+-- Description: AXI-Lite master bridge for SACI bus slave
 -------------------------------------------------------------------------------
 -- This file is part of 'SLAC Firmware Standard Library'.
 -- It is subject to the license terms in the LICENSE.txt file found in the
@@ -118,6 +118,7 @@ begin
    axilReq.address(1 downto 0)   <= "00";
    axilReq.address(13 downto 2)  <= addr;
    axilReq.address(20 downto 14) <= cmd;
+   axilReq.address(31 downto 21) <= (others => '0');
    axilReq.wrData                <= wrData;
 
    ------------------------------------------------------
