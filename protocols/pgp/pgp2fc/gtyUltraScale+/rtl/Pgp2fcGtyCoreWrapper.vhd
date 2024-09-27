@@ -1,5 +1,5 @@
 -------------------------------------------------------------------------------
--- Title      : PGPv2b: https://confluence.slac.stanford.edu/x/q86fD
+-- Title      : PGP2fc: https://confluence.slac.stanford.edu/x/JhItHw
 -------------------------------------------------------------------------------
 -- Company    : SLAC National Accelerator Laboratory
 -------------------------------------------------------------------------------
@@ -50,6 +50,7 @@ entity Pgp2fcGtyCoreWrapper is
       gtTxN          : out sl;
 
       -- Rx ports
+      phyRxReady     : out sl;
       rxReset        : in  sl;
       rxUsrClkActive : in  sl;
       rxResetDone    : out sl;
@@ -61,7 +62,6 @@ entity Pgp2fcGtyCoreWrapper is
       rxDecErr       : out slv(1 downto 0);
       rxPolarity     : in  sl;
       rxOutClk       : out sl;
-      rxRecClk       : out sl; -- raw recovered clock
 
       -- Tx Ports
       txReset        : in  sl;
@@ -159,7 +159,6 @@ architecture mapping of Pgp2fcGtyCoreWrapper is
          rxctrl3_out                        : out std_logic_vector (7 downto 0);
          rxdlysresetdone_out                : out std_logic_vector (0 downto 0);
          rxoutclk_out                       : out std_logic_vector (0 downto 0);
-         rxrecclkout_out                    : out std_logic_vector (0 downto 0);
          rxphaligndone_out                  : out std_logic_vector (0 downto 0);
          rxpmaresetdone_out                 : out std_logic_vector (0 downto 0);
          rxresetdone_out                    : out std_logic_vector (0 downto 0);
@@ -212,7 +211,8 @@ architecture mapping of Pgp2fcGtyCoreWrapper is
    signal rxPmaReset        : sl := '0';
    signal txPcsReset        : sl := '0';
    signal txPmaReset        : sl := '0';
-   signal rxPmaResetDoneInt    : sl := '0';
+   signal rxPmaResetDoneInt : sl := '0';
+   signal rxResetDoneInt    : sl := '0';
    signal txPmaResetDone    : sl := '0';
    signal rxByteIsAligned   : sl := '0';
    signal rxByteReAlign     : sl := '0';
@@ -257,7 +257,7 @@ begin
          gtwiz_userclk_tx_active_in(0)         => txUsrActive,
          gtwiz_userclk_rx_active_in(0)         => rxUsrActive,
          gtwiz_reset_clk_freerun_in(0)         => stableClk,
-         gtwiz_reset_all_in(0)                 => '0',
+         gtwiz_reset_all_in(0)                 => stableRst,
          gtwiz_buffbypass_tx_reset_in(0)       => buffBypassTxReset,
          gtwiz_buffbypass_tx_start_user_in(0)  => buffBypassTxStart,
          gtwiz_buffbypass_tx_done_out(0)       => buffBypassTxDone,
@@ -328,10 +328,9 @@ begin
          rxdlysresetdone_out(0)                => rxDlysResetDone,
          rxphaligndone_out(0)                  => rxPhyAlignDone,
          rxoutclk_out(0)                       => rxOutClkGt,
-         rxrecclkout_out(0)                    => rxRecClk,
          txoutclk_out(0)                       => txOutClkGt, -- unused
          rxpmaresetdone_out(0)                 => rxPmaResetDoneInt,
-         rxresetdone_out(0)                    => rxResetDone,
+         rxresetdone_out(0)                    => rxResetDoneInt,
          rxsyncdone_out(0)                     => rxSyncDone,
          txpmaresetdone_out(0)                 => txPmaResetDone,
          txresetdone_out(0)                    => txResetDone);
@@ -443,7 +442,10 @@ begin
    txUsrActive       <= txUsrClkActive and txPmaResetDone;
    rxUsrActive       <= rxUsrClkActive and rxPmaResetDoneInt;
 
-   rxPmaResetDone <= rxPmaResetDoneInt;
+   rxPmaResetDone    <= rxPmaResetDoneInt;
+
+   rxResetDone       <= rxResetDoneInt and buffBypassRxDone;
+   phyRxReady        <= rxResetDoneInt;
 
    cPllRefClkSel     <= ite(SEL_FABRIC_REFCLK_G, "111", "001");
 

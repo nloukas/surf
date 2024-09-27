@@ -1,5 +1,5 @@
 -------------------------------------------------------------------------------
--- Title      : PGPv2b: https://confluence.slac.stanford.edu/x/q86fD
+-- Title      : PGP2fc: https://confluence.slac.stanford.edu/x/JhItHw
 -------------------------------------------------------------------------------
 -- Company    : SLAC National Accelerator Laboratory
 -------------------------------------------------------------------------------
@@ -52,7 +52,6 @@ entity Pgp2fcGthUltra is
       gtRefClk         : in  sl;
       gtFabricRefClk   : in  sl;
       gtUserRefClk     : in  sl;
-      rxRecClk         : out sl;
       -- Gt Serial IO
       pgpGtTxP         : out sl;
       pgpGtTxN         : out sl;
@@ -127,7 +126,7 @@ begin
          rstOut => resetGtSync);                             -- [out]
 
    --gtHardReset <= resetGtSync or stableRst;
-   gtHardReset <= stableRst;   
+   gtHardReset <= stableRst;
 
    U_RstSync_4 : entity surf.SynchronizerOneShot
       generic map (
@@ -218,7 +217,6 @@ begin
          rxDecErr        => phyRxLaneIn.decErr,
          rxPolarity      => RX_POLARITY_G,
          rxOutClk        => pgpRxOutClk,
-         rxRecClk        => rxRecClk,
          txReset         => gtTxUserReset,
          txUsrClk        => pgpTxClk,
          txUsrClkActive  => pgpTxMmcmLocked,

@@ -1,5 +1,5 @@
 -------------------------------------------------------------------------------
--- Title      : PGPv2b: https://confluence.slac.stanford.edu/x/q86fD
+-- Title      : PGP2fc: https://confluence.slac.stanford.edu/x/JhItHw
 -------------------------------------------------------------------------------
 -- Company    : SLAC National Accelerator Laboratory
 -------------------------------------------------------------------------------
@@ -52,7 +52,6 @@ entity Pgp2fcGtyUltra is
       gtRefClk         : in  sl;
       gtFabricRefClk   : in  sl;
       gtUserRefClk     : in  sl;
-      rxRecClk         : out sl;
       -- Gt Serial IO
       pgpGtTxP         : out sl;
       pgpGtTxN         : out sl;
@@ -115,7 +114,6 @@ architecture mapping of Pgp2fcGtyUltra is
 begin
 
    pgpTxResetDone <= phyTxReady;
-   pgpRxResetDone <= phyRxReady;
 
    U_RstSync_1 : entity surf.PwrUpRst
       generic map (
@@ -126,8 +124,7 @@ begin
          clk    => stableClk,                                -- [in]
          rstOut => resetGtSync);                             -- [out]
 
-   --gtHardReset <= resetGtSync or stableRst;
-   gtHardReset <= stableRst;   
+   gtHardReset <= resetGtSync or stableRst;
 
    U_RstSync_4 : entity surf.SynchronizerOneShot
       generic map (
@@ -178,6 +175,7 @@ begin
          phyTxReady       => phyTxReady,
          pgpRxClk         => pgpRxClk,
          pgpRxClkRst      => pgpRxReset,
+         pgpRxPhyRst      => gtRxUserReset,
          pgpRxIn          => pgpRxIn,
          pgpRxOut         => pgpRxOut,
          pgpRxMasters     => pgpRxMasters,
@@ -207,9 +205,10 @@ begin
          gtRxN           => pgpGtRxN,
          gtTxP           => pgpGtTxP,
          gtTxN           => pgpGtTxN,
+         phyRxReady      => phyRxReady,
          rxReset         => gtRxUserReset,
          rxUsrClkActive  => pgpRxMmcmLocked,
-         rxResetDone     => phyRxReady,
+         rxResetDone     => pgpRxResetDone,
          rxPmaResetDone  => pgpRxPmaResetDone,
          rxUsrClk        => pgpRxClk,
          rxData          => phyRxLaneIn.data,
@@ -218,7 +217,6 @@ begin
          rxDecErr        => phyRxLaneIn.decErr,
          rxPolarity      => RX_POLARITY_G,
          rxOutClk        => pgpRxOutClk,
-         rxRecClk        => rxRecClk,
          txReset         => gtTxUserReset,
          txUsrClk        => pgpTxClk,
          txUsrClkActive  => pgpTxMmcmLocked,
